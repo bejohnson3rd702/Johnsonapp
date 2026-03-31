@@ -1,296 +1,287 @@
-import React, { useState, useContext } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Platform, StatusBar, Image } from 'react-native';
+import React, { useState, useContext, useEffect, useRef } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Platform, StatusBar, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ThemeContext } from '../ThemeContext';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView, BlurTint } from 'expo-blur';
+
+// --- FIREBASE IMPORTS ---
+import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { db, auth } from '../../firebaseConfig';
 
 export default function ChatScreen() {
-  const { isDark, sendLocalNotification } = useContext(ThemeContext);
+  const { isDark } = useContext(ThemeContext);
   const styles = getStyles(isDark);
+  const scrollViewRef = useRef<ScrollView>(null);
 
-  const [activeChat, setActiveChat] = useState('entire');
+  const [myHouseholdId, setMyHouseholdId] = useState<string>('main');
   const [newMessage, setNewMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
 
-  type Message = { id: string; sender: string; text: string; time: string; image?: string; };
-
-  const [entireFamilyMessages, setEntireFamilyMessages] = useState<Message[]>([
-    { id: '1', sender: 'Aunt Sue', text: 'Are we still doing the reunion in July?', time: '9:00 AM' },
-    { id: '2', sender: 'Dad', text: 'Yes! Need to finalize the cabin rental.', time: '9:15 AM' },
-    { id: '3', sender: 'Uncle Bob', text: 'Look at this cabin I found!', image: 'https://images.unsplash.com/photo-1542315059-c2847a469f37?w=400&q=80', time: '9:30 AM'}
+  type Message = { id: string; sender: string; senderId: string; text: string; time: string; householdId: string; createdAt?: any };
+  const [messages, setMessages] = useState<Message[]>([
+    { id: 'loading', sender: 'System', senderId: 'sys', text: 'Loading family messages...', time: '', householdId: 'main' }
   ]);
 
-  const [householdMessages, setHouseholdMessages] = useState<Message[]>([
-    { id: '1', sender: 'Mom', text: 'Hey family! Who wants pizza for dinner tonight?', time: '10:00 AM' },
-    { id: '2', sender: 'Dad', text: 'I am down! 🍕', time: '10:05 AM' },
-    { id: '3', sender: 'Ava', text: 'Yes please!!! Can we get pepperoni?', time: '10:12 AM' }
-  ]);
+  useEffect(() => {
+    // 1. Fetch current user's household config
+    const fetchHousehold = async () => {
+      if (auth.currentUser) {
+        const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+        if (userDoc.exists()) {
+          setMyHouseholdId(userDoc.data().householdId || 'main');
+        }
+      }
+    };
+    fetchHousehold();
 
-  const currentMessages = activeChat === 'entire' ? entireFamilyMessages : householdMessages;
-  const setCurrentMessages = activeChat === 'entire' ? setEntireFamilyMessages : setHouseholdMessages;
+    // 2. Listen to all messages in the messages collection
+    const q = query(collection(db, 'messages'), orderBy('createdAt', 'asc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const liveMessages = snapshot.docs.map(doc => {
+        const data = doc.data();
+        let timeString = 'Just now';
+        if (data.createdAt) {
+          const date = data.createdAt.toDate();
+          timeString = date.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' });
+        }
+        
+        return {
+          id: doc.id,
+          sender: data.sender || 'Unknown',
+          senderId: data.senderId || '',
+          text: data.text || '',
+          time: timeString,
+          householdId: data.householdId || 'main'
+        } as Message;
+      });
+      
+      setMessages(liveMessages);
+      // Auto scroll to bottom
+      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 200);
+    });
 
-  const sendEmoji = (emoji: string) => {
-    setNewMessage(prev => prev + emoji);
-  };
+    return () => unsubscribe();
+  }, []);
 
-  const pickImage = () => {
-    alert("Image picker would open here!");
-    
-    setTimeout(() => {
-      setCurrentMessages(prev => [...prev, {
-        id: Date.now().toString(),
-        sender: 'Me',
-        text: '',
-        image: 'https://images.unsplash.com/photo-1616091093714-c64882e9ab55?w=400&q=80',
-        time: 'Just now'
-      }]);
-    }, 1000);
-  };
+  // Filter messages to ONLY show those matching our household ID safely segregating chats automatically
+  const currentMessages = messages.filter(m => m.householdId === myHouseholdId || m.id === 'loading');
 
-  const sendMessage = () => {
-    if (newMessage.trim()) {
-      setCurrentMessages([...currentMessages, {
-        id: Date.now().toString(),
-        sender: 'Me',
-        text: newMessage,
-        time: 'Just now'
-      }]);
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !auth.currentUser) return;
+    setIsSending(true);
+    try {
+      await addDoc(collection(db, 'messages'), {
+        sender: auth.currentUser.displayName || 'Family Member',
+        senderId: auth.currentUser.uid,
+        text: newMessage.trim(),
+        householdId: myHouseholdId,
+        createdAt: serverTimestamp()
+      });
       setNewMessage('');
-
-      // Simulate reply to trigger notification
-      setTimeout(() => {
-        sendLocalNotification("Johnson Family App", `Mom: Sounds good!`);
-        setCurrentMessages((prev) => [...prev, {
-          id: Date.now().toString(),
-          sender: 'Mom',
-          text: 'Sounds good!',
-          time: 'Just now'
-        }]);
-      }, 2000);
-    }
+    } catch (e: any) { alert("Message failed: " + e.message); }
+    setIsSending(false);
   };
+
+  const blurTint: BlurTint = isDark ? 'dark' : 'light';
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Family Chat</Text>
-      </View>
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+    >
+      <LinearGradient colors={isDark ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#e0c3fc', '#8ec5fc', '#4facfe']} style={styles.safeArea}>
+        <SafeAreaView style={{ flex: 1 }}>
+          <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      <View style={styles.segmentContainer}>
-        <TouchableOpacity 
-          style={[styles.segment, activeChat === 'entire' && styles.segmentActive]}
-          onPress={() => setActiveChat('entire')}
-        >
-          <Text style={[styles.segmentText, activeChat === 'entire' && styles.segmentTextActive]}>Johnson Family</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.segment, activeChat === 'household' && styles.segmentActive]}
-          onPress={() => setActiveChat('household')}
-        >
-          <Text style={[styles.segmentText, activeChat === 'household' && styles.segmentTextActive]}>Our Household</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView style={styles.chatArea} contentContainerStyle={styles.chatContent}>
-        {currentMessages.map((msg) => {
-          const isMe = msg.sender === 'Me';
-          return (
-            <View key={msg.id} style={[styles.messageBubble, isMe ? styles.myMessage : styles.theirMessage, msg.image && styles.imageBubble]}>
-              {!isMe && <Text style={styles.senderName}>{msg.sender}</Text>}
-              
-              {msg.image && (
-                <Image source={{ uri: msg.image }} style={styles.messageImage} />
-              )}
-              
-              {!!msg.text && (
-                 <Text style={[styles.messageText, isMe && styles.myMessageText]}>{msg.text}</Text>
-              )}
-              
-              <Text style={[styles.timeText, isMe && {color: msg.image ? '#8e8e93' : '#d1d1d6'}]}>{msg.time}</Text>
+          {/* HEADER */}
+          <BlurView intensity={isDark ? 50 : 80} tint={blurTint} style={styles.headerGlass}>
+            <View style={styles.headerContent}>
+              <Text style={styles.title}>Our Household</Text>
+              <Text style={styles.subtitle}>Private Family Chat</Text>
             </View>
-          );
-        })}
-      </ScrollView>
+          </BlurView>
 
-      <View style={styles.emojiBar}>
-        {['👍', '❤️', '😂', '🔥', '🎉'].map(emoji => (
-          <TouchableOpacity key={emoji} onPress={() => sendEmoji(emoji)} style={styles.quickEmoji}>
-            <Text style={styles.quickEmojiText}>{emoji}</Text>
-          </TouchableOpacity>
-        ))}
-        <TouchableOpacity style={styles.gifButton}>
-          <Text style={styles.gifButtonText}>GIF</Text>
-        </TouchableOpacity>
-      </View>
+          {/* CHAT FEED */}
+          <ScrollView 
+             ref={scrollViewRef} 
+             style={styles.chatContainer} 
+             contentContainerStyle={{padding: 16, paddingBottom: 20}}
+          >
+            {currentMessages.length === 0 ? (
+               <View style={styles.emptyState}>
+                 <Text style={styles.emptyText}>Be the first to say hello!</Text>
+               </View>
+            ) : (
+               currentMessages.map(msg => {
+                 const isMe = msg.senderId === auth.currentUser?.uid;
+                 const isSystem = msg.id === 'loading';
+                 
+                 if (isSystem) return (
+                     <View key={msg.id} style={{alignItems: 'center', marginVertical: 20}}>
+                        <Text style={{color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}}>{msg.text}</Text>
+                     </View>
+                 );
 
-      <View style={styles.inputContainer}>
-        <TouchableOpacity style={styles.attachButton} onPress={pickImage}>
-          <IconSymbol name="plus.circle.fill" size={28} color={isDark ? "#8e8e93" : "#8e8e93"} />
-        </TouchableOpacity>
-        
-        <TextInput 
-          style={styles.textInput}
-          placeholder="Type a message..."
-          placeholderTextColor={isDark ? "#8e8e93" : "#c7c7cc"}
-          value={newMessage}
-          onChangeText={setNewMessage}
-        />
-        
-        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-          <IconSymbol name="arrow.up.circle.fill" size={32} color="#007aff" />
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+                 return (
+                   <View key={msg.id} style={[styles.messageWrapper, isMe ? styles.messageWrapperMe : styles.messageWrapperThem]}>
+                     {!isMe && (
+                         <View style={styles.avatarPill}>
+                             <Text style={styles.avatarText}>{msg.sender.charAt(0).toUpperCase()}</Text>
+                         </View>
+                     )}
+                     <BlurView 
+                        intensity={isDark ? 50 : 80} 
+                        tint={blurTint} 
+                        style={[styles.messageBubble, isMe ? styles.messageBubbleMe : styles.messageBubbleThem]}
+                     >
+                       {!isMe && <Text style={styles.messageSender}>{msg.sender}</Text>}
+                       <Text style={styles.messageText}>{msg.text}</Text>
+                       <Text style={styles.messageTime}>{msg.time}</Text>
+                     </BlurView>
+                   </View>
+                 )
+               })
+            )}
+          </ScrollView>
+
+          {/* INPUT AREA */}
+          <BlurView intensity={isDark ? 60 : 90} tint={blurTint} style={styles.inputContainer}>
+            <TextInput
+              style={styles.inputField}
+              placeholder="Message your household..."
+              placeholderTextColor={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"}
+              value={newMessage}
+              onChangeText={setNewMessage}
+              multiline
+              maxLength={500}
+            />
+            <TouchableOpacity 
+               style={[styles.sendButton, !newMessage.trim() && {opacity: 0.5}]} 
+               onPress={sendMessage}
+               disabled={!newMessage.trim() || isSending}
+            >
+              {isSending ? <ActivityIndicator color="#fff" /> : <IconSymbol name="arrow.up" size={20} color="#fff" />}
+            </TouchableOpacity>
+          </BlurView>
+
+        </SafeAreaView>
+      </LinearGradient>
+    </KeyboardAvoidingView>
   );
 }
 
 const getStyles = (isDark: boolean) => StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: isDark ? '#000' : '#f2f2f7',
+  safeArea: { flex: 1 },
+  headerGlass: {
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    borderBottomWidth: 1,
+    borderBottomColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
   },
-  header: {
-    padding: 20,
-    paddingBottom: 12,
-    backgroundColor: isDark ? '#121212' : '#fff',
+  headerContent: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 16,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '700',
-    color: isDark ? '#fff' : '#000',
-  },
-  segmentContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    backgroundColor: isDark ? '#121212' : '#fff',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: isDark ? '#2c2c2e' : '#c6c6c8',
-  },
-  segment: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    backgroundColor: isDark ? '#2c2c2e' : '#e5e5ea',
-    borderRadius: 8,
-    marginHorizontal: 4,
-  },
-  segmentActive: {
-    backgroundColor: '#007aff',
-  },
-  segmentText: {
-    fontWeight: '600',
-    color: isDark ? '#fff' : '#1c1c1e',
-    fontSize: 14,
-  },
-  segmentTextActive: {
     color: '#fff',
+    letterSpacing: 0.5,
   },
-  chatArea: {
-    flex: 1,
-    backgroundColor: isDark ? '#000' : '#f2f2f7',
+  subtitle: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.7)',
+    marginTop: 2,
   },
-  chatContent: {
-    padding: 16,
-    paddingBottom: 40,
+  chatContainer: { flex: 1 },
+  emptyState: { alignItems: 'center', marginTop: 40 },
+  emptyText: { color: isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)' },
+  messageWrapper: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    alignItems: 'flex-end',
+  },
+  messageWrapperMe: {
+    justifyContent: 'flex-end',
+  },
+  messageWrapperThem: {
+    justifyContent: 'flex-start',
+  },
+  avatarPill: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0,122,255,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  avatarText: {
+    color: isDark ? '#fff' : '#007aff',
+    fontWeight: 'bold',
+    fontSize: 12,
   },
   messageBubble: {
-    maxWidth: '80%',
-    padding: 12,
+    maxWidth: '75%',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 20,
-    marginBottom: 12,
+    overflow: 'hidden',
   },
-  imageBubble: {
-    padding: 4,
-    paddingBottom: 8,
-    backgroundColor: isDark ? '#2c2c2e' : '#fff',
-  },
-  theirMessage: {
-    backgroundColor: isDark ? '#2c2c2e' : '#e5e5ea',
-    alignSelf: 'flex-start',
-    borderBottomLeftRadius: 4,
-  },
-  myMessage: {
-    backgroundColor: '#007aff',
-    alignSelf: 'flex-end',
+  messageBubbleMe: {
+    backgroundColor: 'rgba(0,122,255,0.2)',
     borderBottomRightRadius: 4,
   },
-  senderName: {
+  messageBubbleThem: {
+    backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+    borderBottomLeftRadius: 4,
+  },
+  messageSender: {
     fontSize: 12,
-    fontWeight: '600',
-    color: isDark ? '#aeaeb2' : '#8e8e93',
+    fontWeight: 'bold',
+    color: '#007aff',
     marginBottom: 4,
-    marginLeft: 8,
   },
   messageText: {
     fontSize: 16,
     color: isDark ? '#fff' : '#1c1c1e',
     lineHeight: 22,
-    paddingHorizontal: 4,
   },
-  myMessageText: {
-    color: '#fff',
-  },
-  messageImage: {
-    width: 240,
-    height: 240,
-    borderRadius: 16,
-    marginBottom: 4,
-  },
-  timeText: {
-    fontSize: 11,
-    color: isDark ? '#636366' : '#8e8e93',
+  messageTime: {
+    fontSize: 10,
+    color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
     alignSelf: 'flex-end',
     marginTop: 4,
-    marginRight: 4,
-  },
-  emojiBar: {
-    flexDirection: 'row',
-    backgroundColor: isDark ? '#121212' : '#fff',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: isDark ? '#2c2c2e' : '#c6c6c8',
-    alignItems: 'center',
-    gap: 12,
-  },
-  quickEmoji: {
-    padding: 4,
-  },
-  quickEmojiText: {
-    fontSize: 24,
-  },
-  gifButton: {
-    backgroundColor: isDark ? '#2c2c2e' : '#e5e5ea',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    marginLeft: 'auto',
-  },
-  gifButtonText: {
-    fontWeight: '700',
-    color: isDark ? '#fff' : '#1c1c1e',
-    fontSize: 13,
   },
   inputContainer: {
     flexDirection: 'row',
     padding: 12,
-    backgroundColor: isDark ? '#121212' : '#fff',
-    alignItems: 'center',
+    paddingHorizontal: 16,
+    alignItems: 'flex-end',
+    paddingBottom: Platform.OS === 'ios' ? 24 : 12,
   },
-  attachButton: {
-    marginRight: 12,
-  },
-  textInput: {
+  inputField: {
     flex: 1,
-    backgroundColor: isDark ? '#2c2c2e' : '#f2f2f7',
-    color: isDark ? '#fff' : '#000',
+    minHeight: 40,
+    maxHeight: 100,
+    backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.5)',
     borderRadius: 20,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingTop: 12,
+    paddingBottom: 12,
     fontSize: 16,
-    maxHeight: 100,
+    color: isDark ? '#fff' : '#000',
+    marginRight: 10,
   },
   sendButton: {
-    marginLeft: 12,
-  },
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#007aff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 });
