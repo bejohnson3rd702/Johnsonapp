@@ -59,12 +59,12 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <LinearGradient 
-        colors={isDark ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#e0c3fc', '#8ec5fc', '#4facfe']} 
+        colors={isDark ? ['#3E2723', '#4E342E', '#5D4037'] : ['#FFF3E0', '#FFE0B2', '#FFCC80']} 
         style={styles.container}
       >
         <BlurView intensity={isDark ? 50 : 80} tint={blurTint} style={styles.card}>
           <View style={styles.iconContainer}>
-             <IconSymbol name="house.circle.fill" size={72} color={isDark ? '#fff' : '#007aff'} />
+             <IconSymbol name="house.circle.fill" size={72} color={isDark ? '#fff' : '#E65100'} />
           </View>
           <Text style={styles.title}>Johnson Group</Text>
           <Text style={styles.subtitle}>{isRegistering ? 'Create your unique family profile' : 'Welcome back to the family hub'}</Text>
@@ -201,12 +201,12 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     fontWeight: '500',
   },
   button: {
-    backgroundColor: isDark ? '#0a84ff' : '#007aff',
+    backgroundColor: isDark ? '#FF7043' : '#E65100',
     height: 60,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#007aff',
+    shadowColor: '#E65100',
     shadowOpacity: 0.4,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 6 },
@@ -224,7 +224,7 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     padding: 10,
   },
   linkText: {
-    color: isDark ? '#64d2ff' : '#007aff',
+    color: isDark ? '#64d2ff' : '#E65100',
     fontSize: 15,
     fontWeight: '700',
   }

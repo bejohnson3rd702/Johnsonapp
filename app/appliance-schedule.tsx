@@ -83,23 +83,23 @@ export default function ApplianceScheduleScreen() {
   };
 
   const markedDates = schedule.reduce((acc, s) => {
-    if (!acc[s.date]) acc[s.date] = { marked: true, dotColor: '#007aff' };
+    if (!acc[s.date]) acc[s.date] = { marked: true, dotColor: '#E65100' };
     return acc;
   }, {});
 
   const blurTint: BlurTint = isDark ? 'dark' : 'light';
 
   return (
-    <LinearGradient colors={isDark ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#e0c3fc', '#8ec5fc', '#4facfe']} style={styles.container}>
+    <LinearGradient colors={isDark ? ['#3E2723', '#4E342E', '#5D4037'] : ['#FFF3E0', '#FFE0B2', '#FFCC80']} style={styles.container}>
       <CalendarProvider
         date={selectedDate}
         onDateChanged={setSelectedDate}
         theme={{
           calendarBackground: 'transparent',
           textSectionTitleColor: isDark ? '#ffffff' : '#000000',
-          selectedDayBackgroundColor: '#007aff',
+          selectedDayBackgroundColor: '#E65100',
           selectedDayTextColor: '#ffffff',
-          todayTextColor: '#007aff',
+          todayTextColor: '#E65100',
           dayTextColor: isDark ? '#ffffff' : '#2d4150',
           textDisabledColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
         }}
@@ -118,7 +118,7 @@ export default function ApplianceScheduleScreen() {
             <Text style={styles.slotHeader}>
               {(typeof type === 'string' ? type.charAt(0).toUpperCase() + type.slice(1) : '')} Schedule for {selectedDate}
             </Text>
-          {loading && <ActivityIndicator color="#007aff" style={{marginBottom: 10}} />}
+          {loading && <ActivityIndicator color="#E65100" style={{marginBottom: 10}} />}
           
           {timeSlots.map(time => {
              const booking = schedule.find(s => s.date === selectedDate && s.timeSlot === time);
@@ -146,7 +146,7 @@ export default function ApplianceScheduleScreen() {
              )
           })}
           
-          <TouchableOpacity onPress={() => router.back()} style={{ backgroundColor: '#007aff', padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 30 }}>
+          <TouchableOpacity onPress={() => router.back()} style={{ backgroundColor: '#E65100', padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 30 }}>
              <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>Save & Close</Text>
             </TouchableOpacity>
           </ScrollView>
@@ -190,7 +190,7 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
   },
   slotRowMine: {
     backgroundColor: isDark ? 'rgba(0,122,255,0.3)' : 'rgba(0,122,255,0.1)',
-    borderColor: '#007aff',
+    borderColor: '#E65100',
   },
   slotTime: {
     fontSize: 16,
@@ -199,13 +199,13 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
   },
   slotStatus: {
     fontSize: 16,
-    color: '#007aff',
+    color: '#E65100',
     fontWeight: '700',
   },
   slotTextBooked: {
     color: isDark ? '#aeaeb2' : '#8e8e93',
   },
   slotTextMine: {
-    color: isDark ? '#64d2ff' : '#007aff',
+    color: isDark ? '#64d2ff' : '#E65100',
   }
 });

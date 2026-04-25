@@ -95,7 +95,7 @@ export default function SettingsScreen() {
   const blurTint: BlurTint = isDark ? 'dark' : 'light';
 
   return (
-    <LinearGradient colors={isDark ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#e0c3fc', '#8ec5fc', '#4facfe']} style={{flex: 1}}>
+    <LinearGradient colors={isDark ? ['#3E2723', '#4E342E', '#5D4037'] : ['#FFF3E0', '#FFE0B2', '#FFCC80']} style={{flex: 1}}>
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={{padding: 8}}>
@@ -158,7 +158,7 @@ export default function SettingsScreen() {
                           </View>
                           <TouchableOpacity 
                              onPress={() => assignToMyHousehold(u.id)}
-                             style={{backgroundColor: '#007aff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12}}>
+                             style={{backgroundColor: '#E65100', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12}}>
                               <Text style={{color: '#fff', fontWeight: 'bold', fontSize: 12}}>Add to Household</Text>
                           </TouchableOpacity>
                        </View>
@@ -175,7 +175,7 @@ export default function SettingsScreen() {
                            <Text style={styles.adminRowText}>{req.name}</Text>
                            <Text style={styles.adminRowSub}>Wants to start their own household</Text>
                          </View>
-                         <TouchableOpacity onPress={() => approveRequest(req)} style={{backgroundColor: '#007aff', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8}}>
+                         <TouchableOpacity onPress={() => approveRequest(req)} style={{backgroundColor: '#E65100', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8}}>
                            <Text style={{color: '#fff', fontWeight: 'bold'}}>Approve</Text>
                          </TouchableOpacity>
                       </View>
@@ -190,7 +190,7 @@ export default function SettingsScreen() {
                  <Text style={styles.adminTitle}>Household Permissions</Text>
                  <Text style={styles.adminSubtitle}>You are currently a household member.</Text>
                  
-                 <TouchableOpacity onPress={requestOwnHousehold} style={{marginTop: 16, backgroundColor: '#007aff', padding: 14, borderRadius: 12, alignItems: 'center'}}>
+                 <TouchableOpacity onPress={requestOwnHousehold} style={{marginTop: 16, backgroundColor: '#E65100', padding: 14, borderRadius: 12, alignItems: 'center'}}>
                     <Text style={{color: '#fff', fontWeight: 'bold', fontSize: 16}}>Request New Household</Text>
                  </TouchableOpacity>
                </View>
@@ -202,13 +202,13 @@ export default function SettingsScreen() {
                  <Text style={styles.adminRowSub}>Toggle Mode</Text>
                </View>
                <View style={{flexDirection: 'row', gap: 6}}>
-                 <TouchableOpacity onPress={() => setTheme('light')} style={{padding: 6, backgroundColor: theme === 'light' ? '#007aff' : 'transparent', borderRadius: 8}}>
+                 <TouchableOpacity onPress={() => setTheme('light')} style={{padding: 6, backgroundColor: theme === 'light' ? '#E65100' : 'transparent', borderRadius: 8}}>
                    <Text style={{fontWeight: '600', color: theme === 'light' ? '#fff' : (isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)')}}>Light</Text>
                  </TouchableOpacity>
-                 <TouchableOpacity onPress={() => setTheme('dark')} style={{padding: 6, backgroundColor: theme === 'dark' ? '#007aff' : 'transparent', borderRadius: 8}}>
+                 <TouchableOpacity onPress={() => setTheme('dark')} style={{padding: 6, backgroundColor: theme === 'dark' ? '#E65100' : 'transparent', borderRadius: 8}}>
                    <Text style={{fontWeight: '600', color: theme === 'dark' ? '#fff' : (isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)')}}>Dark</Text>
                  </TouchableOpacity>
-                 <TouchableOpacity onPress={() => setTheme('system')} style={{padding: 6, backgroundColor: theme === 'system' ? '#007aff' : 'transparent', borderRadius: 8}}>
+                 <TouchableOpacity onPress={() => setTheme('system')} style={{padding: 6, backgroundColor: theme === 'system' ? '#E65100' : 'transparent', borderRadius: 8}}>
                    <Text style={{fontWeight: '600', color: theme === 'system' ? '#fff' : (isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)')}}>System</Text>
                  </TouchableOpacity>
                </View>
@@ -240,7 +240,7 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     color: '#fff',
   },
   linkText: {
-    color: isDark ? '#64d2ff' : '#007aff',
+    color: isDark ? '#64d2ff' : '#E65100',
     fontSize: 17,
     fontWeight: '600',
   },

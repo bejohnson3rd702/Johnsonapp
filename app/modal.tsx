@@ -49,7 +49,7 @@ export default function ModalScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
-    <LinearGradient colors={isDark ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#e0c3fc', '#8ec5fc', '#4facfe']} style={styles.container}>
+    <LinearGradient colors={isDark ? ['#3E2723', '#4E342E', '#5D4037'] : ['#FFF3E0', '#FFE0B2', '#FFCC80']} style={styles.container}>
       <ScrollView contentContainerStyle={{flexGrow: 1, paddingBottom: 40}} keyboardShouldPersistTaps="handled">
       <Text style={styles.title}>New Event</Text>
       
@@ -178,7 +178,7 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     lineHeight: 18,
   },
   saveButton: {
-    backgroundColor: '#007aff',
+    backgroundColor: '#E65100',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',

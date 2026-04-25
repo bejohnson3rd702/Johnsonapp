@@ -91,7 +91,7 @@ export default function ChatScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
-      <LinearGradient colors={isDark ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#e0c3fc', '#8ec5fc', '#4facfe']} style={styles.safeArea}>
+      <LinearGradient colors={isDark ? ['#3E2723', '#4E342E', '#5D4037'] : ['#FFF3E0', '#FFE0B2', '#FFCC80']} style={styles.safeArea}>
         <SafeAreaView style={{ flex: 1 }}>
           <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
@@ -220,7 +220,7 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     marginRight: 8,
   },
   avatarText: {
-    color: isDark ? '#fff' : '#007aff',
+    color: isDark ? '#fff' : '#E65100',
     fontWeight: 'bold',
     fontSize: 12,
   },
@@ -242,7 +242,7 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
   messageSender: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#007aff',
+    color: '#E65100',
     marginBottom: 4,
   },
   messageText: {
@@ -280,7 +280,7 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#007aff',
+    backgroundColor: '#E65100',
     alignItems: 'center',
     justifyContent: 'center',
   }

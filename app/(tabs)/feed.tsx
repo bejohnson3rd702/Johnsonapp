@@ -197,7 +197,7 @@ export default function FeedScreen() {
       style={{ flex: 1 }} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <LinearGradient colors={isDark ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#e0c3fc', '#8ec5fc', '#4facfe']} style={styles.safeArea}>
+      <LinearGradient colors={isDark ? ['#3E2723', '#4E342E', '#5D4037'] : ['#FFF3E0', '#FFE0B2', '#FFCC80']} style={styles.safeArea}>
         <SafeAreaView style={{ flex: 1 }}>
           <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
@@ -216,7 +216,7 @@ export default function FeedScreen() {
                <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, paddingHorizontal: 4}}>
                    <Text style={{fontSize: 18, fontWeight: '700', color: '#fff'}}>Upcoming Events</Text>
                    <TouchableOpacity onPress={() => router.push('/modal')} style={{backgroundColor: 'rgba(0,122,255,0.2)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12}}>
-                       <Text style={{color: '#007aff', fontWeight: 'bold'}}>Add</Text>
+                       <Text style={{color: '#E65100', fontWeight: 'bold'}}>Add</Text>
                    </TouchableOpacity>
                </View>
                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{paddingRight: 16}}>
@@ -231,7 +231,7 @@ export default function FeedScreen() {
                           return (
                               <BlurView key={evt.id} intensity={isDark ? 50 : 80} tint={blurTint} style={{flexDirection: 'row', width: 280, padding: 12, borderRadius: 20, marginRight: 12}}>
                                   <View style={{width: 50, alignItems: 'center', justifyContent: 'center', borderRightWidth: 1, borderRightColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', marginRight: 12}}>
-                                     <Text style={{fontSize: 12, fontWeight: '700', color: '#007aff'}}>{dayShort}</Text>
+                                     <Text style={{fontSize: 12, fontWeight: '700', color: '#E65100'}}>{dayShort}</Text>
                                      <Text style={{fontSize: 22, fontWeight: '800', color: isDark ? '#fff' : '#000'}}>{numDay}</Text>
                                   </View>
                                   <View style={{flex: 1, justifyContent: 'center'}}>
@@ -378,7 +378,7 @@ export default function FeedScreen() {
                                         onSubmitEditing={() => submitComment(post.id)}
                                      />
                                      <TouchableOpacity onPress={() => submitComment(post.id)} style={styles.sendCommentBtn}>
-                                        <IconSymbol name="arrow.up.circle.fill" size={28} color="#007aff" />
+                                        <IconSymbol name="arrow.up.circle.fill" size={28} color="#E65100" />
                                      </TouchableOpacity>
                                   </View>
                                )}
@@ -475,7 +475,7 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     marginRight: 12,
   },
   profileInitials: {
-    color: isDark ? '#fff' : '#007aff',
+    color: isDark ? '#fff' : '#E65100',
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -556,7 +556,7 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     fontWeight: '600',
   },
   submitBtn: {
-    backgroundColor: '#007aff',
+    backgroundColor: '#E65100',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,

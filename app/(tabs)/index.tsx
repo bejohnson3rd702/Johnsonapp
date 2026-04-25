@@ -171,7 +171,7 @@ export default function HomeScreen() {
             <Text style={styles.machineUser}>Booked by {data.bookedBy}</Text>
             {isMine && (
               <TouchableOpacity onPress={() => freeAppliance(type)} style={{marginTop: 8, marginBottom: 4}}>
-                <Text style={{color: '#007aff', fontWeight: 'bold'}}>Finish Early</Text>
+                <Text style={{color: '#E65100', fontWeight: 'bold'}}>Finish Early</Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity style={styles.bookButton} onPress={handleActionClick}>
@@ -204,7 +204,7 @@ export default function HomeScreen() {
                return (
                  <View key={s.id} style={{paddingVertical: 6, alignItems: 'center'}}>
                     <Text style={{color: isDark ? '#fff' : '#000', fontWeight: '500', fontSize: 14}}>
-                        {dayName} at {s.timeSlot} <Text style={{color: '#007aff', fontWeight: '700'}}>• {s.bookedBy}</Text>
+                        {dayName} at {s.timeSlot} <Text style={{color: '#E65100', fontWeight: '700'}}>• {s.bookedBy}</Text>
                     </Text>
                  </View>
                )
@@ -257,7 +257,7 @@ export default function HomeScreen() {
   const blurTint: BlurTint = isDark ? 'dark' : 'light';
 
   return (
-    <LinearGradient colors={isDark ? ['#1a1a2e', '#16213e', '#0f3460'] : ['#e0c3fc', '#8ec5fc', '#4facfe']} style={styles.safeArea}>
+    <LinearGradient colors={isDark ? ['#3E2723', '#4E342E', '#5D4037'] : ['#FFF3E0', '#FFE0B2', '#FFCC80']} style={styles.safeArea}>
     <SafeAreaView style={{flex: 1}}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <View style={styles.header}>
@@ -265,7 +265,7 @@ export default function HomeScreen() {
           <Text style={styles.title}>Our Household</Text>
           <View style={styles.headerActions}>
             <TouchableOpacity onPress={() => Alert.alert('Household Invite Code', `Share this code with your family member to join your household tier:\n\n${currentUser?.householdId}`)} style={styles.inviteBtn}>
-              <IconSymbol name="person.crop.circle.badge.plus" size={24} color="#007aff" />
+              <IconSymbol name="person.crop.circle.badge.plus" size={24} color="#E65100" />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push('/settings')} style={styles.inviteBtn}>
               <IconSymbol name="gear" size={24} color={isDark ? "#fff" : "#1c1c1e"} />
@@ -313,7 +313,7 @@ export default function HomeScreen() {
                  onSubmitEditing={submitAnnouncement}
                  returnKeyType="send"
                />
-               <TouchableOpacity onPress={submitAnnouncement} style={{backgroundColor: '#007aff', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8, marginLeft: 8}}>
+               <TouchableOpacity onPress={submitAnnouncement} style={{backgroundColor: '#E65100', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8, marginLeft: 8}}>
                   <Text style={{color: '#fff', fontWeight: 'bold'}}>Send</Text>
                </TouchableOpacity>
             </View>
@@ -352,8 +352,8 @@ export default function HomeScreen() {
                        <Text style={styles.eventNumber}>{numDay}</Text>
                     </View>
                     <View style={styles.eventDetailsBox}>
-                       <View style={[styles.eventPill, { backgroundColor: isDark ? '#4a3b69' : '#EADDFF' }]}>
-                         <Text style={[styles.eventTime, isDark && {color: '#eaddff'}]}>{evt.time}</Text>
+                       <View style={[styles.eventPill, { backgroundColor: isDark ? '#4E342E' : '#FFE0B2' }]}>
+                         <Text style={[styles.eventTime, isDark && {color: '#FFCC80'}]}>{evt.time}</Text>
                          <Text style={[styles.eventName, isDark && {color: '#fff'}]}>{evt.title}</Text>
                        </View>
                     </View>
@@ -410,7 +410,7 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     marginHorizontal: 4,
   },
   segmentActive: {
-    backgroundColor: isDark ? 'rgba(10, 132, 255, 0.9)' : '#007aff',
+    backgroundColor: isDark ? 'rgba(10, 132, 255, 0.9)' : '#E65100',
   },
   segmentText: {
     fontWeight: '700',
@@ -517,7 +517,7 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     color: isDark ? '#fff' : '#000',
   },
   linkText: {
-    color: '#007aff',
+    color: '#E65100',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -555,7 +555,7 @@ const getStyles = (isDark: boolean) => StyleSheet.create({
     marginTop: 4,
   },
   bookButton: {
-    backgroundColor: '#007aff',
+    backgroundColor: '#E65100',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
