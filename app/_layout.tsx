@@ -5,9 +5,20 @@ import 'react-native-reanimated';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
-
 import { ThemeProvider as AppThemeProvider, useTheme } from './ThemeContext';
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
+import { Platform } from 'react-native';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 export const unstable_settings = {
   anchor: '(tabs)',
 };
@@ -22,9 +33,49 @@ function RootNavigator() {
   const navigationState = useRootNavigationState();
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (usr) => {
+    const unsub = onAuthStateChanged(auth, async (usr) => {
       setUser(usr);
       setIsReady(true);
+      
+      // If user logs in, request Push Notification permission & register token
+      if (usr) {
+        try {
+          if (Platform.OS === 'android') {
+            await Notifications.setNotificationChannelAsync('default', {
+              name: 'default',
+              importance: Notifications.AndroidImportance.MAX,
+              vibrationPattern: [0, 250, 250, 250],
+              lightColor: '#FF231F7C',
+            });
+          }
+
+          if (Device.isDevice) {
+            const { status: existingStatus } = await Notifications.getPermissionsAsync();
+            let finalStatus = existingStatus;
+            
+            if (existingStatus !== 'granted') {
+              const { status } = await Notifications.requestPermissionsAsync();
+              finalStatus = status;
+            }
+            
+            if (finalStatus === 'granted') {
+              // Explicit Project ID extracted from app.json
+              const pushTokenData = await Notifications.getExpoPushTokenAsync({
+                projectId: 'f70eeae9-9b7b-46b6-8192-8cf0352f8ec1'
+              });
+              
+              if (pushTokenData && pushTokenData.data) {
+                // Update the user's document in Firestore with the push token
+                await updateDoc(doc(db, 'users', usr.uid), {
+                  expoPushToken: pushTokenData.data
+                });
+              }
+            }
+          }
+        } catch (error) {
+           console.log("Could not register push token securely:", error);
+        }
+      }
     });
     return unsub;
   }, []);

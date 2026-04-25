@@ -231,6 +231,24 @@ export default function HomeScreen() {
         scope: activeScope,
         createdAt: serverTimestamp()
       });
+      
+      // Fire Push Notifications via Expo directly to household users!
+      const targetUsers = users.filter(u => u.householdId === currentUser?.householdId && u.expoPushToken && u.id !== currentUser?.id);
+      targetUsers.forEach(async (u) => {
+          try {
+            await fetch('https://exp.host/--/api/v2/push/send', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                to: u.expoPushToken,
+                title: `📢 New from ${auth.currentUser?.displayName || 'Family'}`,
+                body: postText.trim(),
+                sound: 'default'
+              })
+            });
+          } catch(e) {}
+      });
+
       setPostText('');
       setIsPosting(false);
     } catch (e: any) { alert("Failed to post: " + e.message); }
