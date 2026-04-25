@@ -16,6 +16,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [birthday, setBirthday] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -36,7 +37,7 @@ export default function LoginScreen() {
           email,
           birthday,
           role: 'child', // default to child until approved for own household
-          householdId: 'pending', // Users are globally registered at first, admin assigns to household later
+          householdId: inviteCode.trim() || 'pending', // Bound directly to invite code or sent to the admin queue
           hasWasherAccess: false,
           createdAt: new Date().toISOString()
         });
@@ -89,6 +90,16 @@ export default function LoginScreen() {
                           placeholderTextColor={isDark ? "#8e8e93" : "#8e8e93"}
                           value={birthday}
                           onChangeText={setBirthday}
+                      />
+                  </View>
+                  <View style={[styles.inputWrapper, {backgroundColor: isDark ? 'rgba(0,0,0,0.4)': 'rgba(255,255,255,0.7)', marginTop: 16}]}>
+                      <IconSymbol name="person.3.fill" size={20} color={isDark ? "#8e8e93" : "#8e8e93"} style={styles.inputIcon} />
+                      <TextInput 
+                          style={styles.input} 
+                          placeholder="Household Invite Code (Optional)"
+                          placeholderTextColor={isDark ? "#8e8e93" : "#8e8e93"}
+                          value={inviteCode}
+                          onChangeText={setInviteCode}
                       />
                   </View>
                 </View>

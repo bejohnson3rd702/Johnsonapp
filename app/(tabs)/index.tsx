@@ -246,7 +246,7 @@ export default function HomeScreen() {
         <View style={styles.headerRow}>
           <Text style={styles.title}>Our Household</Text>
           <View style={styles.headerActions}>
-            <TouchableOpacity onPress={() => alert('Invite link copied!')} style={styles.inviteBtn}>
+            <TouchableOpacity onPress={() => Alert.alert('Household Invite Code', `Share this code with your family member to join your household tier:\n\n${currentUser?.householdId}`)} style={styles.inviteBtn}>
               <IconSymbol name="person.crop.circle.badge.plus" size={24} color="#007aff" />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push('/settings')} style={styles.inviteBtn}>
